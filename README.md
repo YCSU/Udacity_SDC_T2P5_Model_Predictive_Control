@@ -27,7 +27,7 @@ To deal with the latency of 100ms, the initial state (x', y', psi', v') to be fe
 ## Choosgin the time step and elapsed duration
 Now we can define the cost function with respect to cross track error, psi error and the change rate of them, etc. The cost function is defined in MPC.cpp (line 53-72). After the cost function is defined, the whole problem becomes a nonlinear programming problem which we need to find a set of future states that can minimize the cost function and satisfies the constraints given by the equations of motions.
 
-To calculate the future states, we need to choose the number of time steps and elapsed duration. We experimented with different combinations of the time steps = (8, 10, 12) and elapsed time duration = (0.1, 0.12, 0.15). We find that the time steps = 10 and elapsed time duration = 0.15 is the most stable one.
+To calculate the future states, we need to choose the number of time steps and elapsed time duration. We experimented with different combinations of the time steps = (8, 10, 12) and elapsed time duration = (0.1, 0.12, 0.15). We find that the combination of the time steps length = 10 and elapsed time duration = 0.15 is the most stable one.
 
 
 ## Dependencies
