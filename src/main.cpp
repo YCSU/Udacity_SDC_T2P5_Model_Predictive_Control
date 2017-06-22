@@ -107,6 +107,7 @@ int main() {
           v = v + a * dt;
           psi = psi - v / Lf * delta * dt;
           
+          // transform into vehicle coordinate
           Eigen::VectorXd ptsx_Eigen(ptsx.size());
           Eigen::VectorXd ptsy_Eigen(ptsy.size());
           for( size_t i = 0; i < ptsx.size(); ++i){
@@ -135,8 +136,8 @@ int main() {
           auto vars = mpc.Solve(state, coeffs);
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          steer_value = -vars[14] / deg2rad(25);
-          throttle_value = vars[15];
+          steer_value = -vars[0] / deg2rad(25);
+          throttle_value = vars[1];
           
           json msgJson;
           msgJson["steering_angle"] = steer_value;
@@ -144,10 +145,10 @@ int main() {
           
           
           //Display the MPC predicted trajectory
-          int N = 5;
+          int N = 7;
           vector<double> mpc_x_vals(N);
           vector<double> mpc_y_vals(N);
-          for(int i = 0; i < N; ++i){
+          for(int i = 2; i < N; ++i){
             mpc_x_vals[i] = vars[0+i];
             mpc_y_vals[i] = vars[N+i];
           }

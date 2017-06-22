@@ -6,7 +6,7 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 10;
+size_t N = 9;
 double dt = 0.15;
 
 // This value assumes the model presented in the classroom is used.
@@ -68,7 +68,7 @@ class FG_eval {
     // Minimize the value gap between sequential actuations.
     for (int t = 0; t < N - 2; t++) {
       fg[0] += 10 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-      fg[0] += 20 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+      fg[0] += 10 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
     
     
@@ -264,9 +264,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   //
   // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
   // creates a 2 element double vector.
-  return {solution.x[x_start], solution.x[x_start + 1], solution.x[x_start + 2],solution.x[x_start + 3],solution.x[x_start + 4],   
-          solution.x[y_start], solution.x[y_start + 1], solution.x[y_start + 2], solution.x[y_start + 3], solution.x[y_start + 4],
-          solution.x[psi_start + 1], solution.x[v_start + 1],
-          solution.x[cte_start + 1], solution.x[epsi_start + 1],
-          solution.x[delta_start],   solution.x[a_start]};
+  return {solution.x[delta_start],   solution.x[a_start], 
+          solution.x[x_start], solution.x[x_start + 1], solution.x[x_start + 2],solution.x[x_start + 3],solution.x[x_start + 4], solution.x[x_start + 5],solution.x[x_start + 6],  
+          solution.x[y_start], solution.x[y_start + 1], solution.x[y_start + 2], solution.x[y_start + 3], solution.x[y_start + 4], solution.x[y_start + 5], solution.x[y_start + 6]};
 }
