@@ -152,20 +152,17 @@ int main() {
             mpc_x_vals[i] = vars[0+i];
             mpc_y_vals[i] = vars[N+i];
           }
-          
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
-
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
 
+          
           //Display the waypoints/reference line
           vector<double> next_x_vals(ptsx_Eigen.data(), ptsx_Eigen.data() + ptsx_Eigen.rows());
           vector<double> next_y_vals(ptsy_Eigen.data(), ptsy_Eigen.data() + ptsy_Eigen.rows());
-
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
-
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
