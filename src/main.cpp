@@ -12,6 +12,8 @@
 // for convenience
 using json = nlohmann::json;
 
+const double Lf = 2.67;
+
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
@@ -70,7 +72,7 @@ int main() {
 
   // MPC is initialized here!
   MPC mpc;
-
+  
   h.onMessage([&mpc](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -91,26 +93,65 @@ int main() {
           double py = j[1]["y"];
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
-
+          double delta = j[1]["steering_angle"];
+          double a = j[1]["throttle"];
+          
           /*
-          * TODO: Calculate steering angle and throttle using MPC.
-          *
+          *Calculate steering angle and throttle using MPC.
           * Both are in between [-1, 1].
-          *
           */
+          //latency
+          double dt = 0.1;
+          px  = px + v * cos(psi) * dt;
+          py  = py + v * sin(psi) * dt;
+          v = v + a * dt;
+          psi = psi - v / Lf * delta * dt;
+          
+          Eigen::VectorXd ptsx_Eigen(ptsx.size());
+          Eigen::VectorXd ptsy_Eigen(ptsy.size());
+          for( size_t i = 0; i < ptsx.size(); ++i){
+            ptsx_Eigen[i] = cos(psi) * (ptsx[i]-px) + sin(psi) * (ptsy[i]-py);
+            ptsy_Eigen[i] = -sin(psi) * (ptsx[i]-px) + cos(psi) * (ptsy[i] - py);
+          }
+          auto coeffs = polyfit(ptsx_Eigen, ptsy_Eigen, 3);
+          // The cross track error is calculated by evaluating at polynomial at x, f(x)
+          // and subtracting y.
+          double cte = coeffs[0];
+          // Due to the sign starting at 0, the orientation error is -f'(x).
+          // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
+          double epsi = -atan(coeffs[1]);
+          std::cout << "cte " << cte << " epsi " << epsi << std::endl;
+          Eigen::VectorXd state(6);
+          state << 0,
+                   0,
+                   0, 
+                   v, 
+                   cte, 
+                   epsi;
+          
+          
           double steer_value;
           double throttle_value;
-
-          json msgJson;
+          auto vars = mpc.Solve(state, coeffs);
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
+          steer_value = -vars[14] / deg2rad(25);
+          throttle_value = vars[15];
+          
+          json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
-
-          //Display the MPC predicted trajectory 
-          vector<double> mpc_x_vals;
-          vector<double> mpc_y_vals;
-
+          
+          
+          //Display the MPC predicted trajectory
+          int N = 5;
+          vector<double> mpc_x_vals(N);
+          vector<double> mpc_y_vals(N);
+          for(int i = 0; i < N; ++i){
+            mpc_x_vals[i] = vars[0+i];
+            mpc_y_vals[i] = vars[N+i];
+          }
+          
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
 
@@ -118,8 +159,8 @@ int main() {
           msgJson["mpc_y"] = mpc_y_vals;
 
           //Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
+          vector<double> next_x_vals(ptsx_Eigen.data(), ptsx_Eigen.data() + ptsx_Eigen.rows());
+          vector<double> next_y_vals(ptsy_Eigen.data(), ptsy_Eigen.data() + ptsy_Eigen.rows());
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
