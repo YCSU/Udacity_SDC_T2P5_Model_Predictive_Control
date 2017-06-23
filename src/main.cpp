@@ -118,8 +118,7 @@ int main() {
           // The cross track error is calculated by evaluating at polynomial at x, f(x)
           // and subtracting y.
           double cte = coeffs[0];
-          // Due to the sign starting at 0, the orientation error is -f'(x).
-          // derivative of coeffs[0] + coeffs[1] * x -> coeffs[1]
+          // Due to the sign starting at 0, the orientation error is -f'(x)
           double epsi = -atan(coeffs[1]);
           std::cout << "cte " << cte << " epsi " << epsi << std::endl;
           Eigen::VectorXd state(6);
