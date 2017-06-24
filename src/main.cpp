@@ -134,7 +134,7 @@ int main() {
           double steer_value;
           double throttle_value;
           auto vars = mpc.Solve(state, coeffs);
-          // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
+          // divide by deg2rad(25)
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
           steer_value = -vars[0] / deg2rad(25);
           throttle_value = vars[1];
